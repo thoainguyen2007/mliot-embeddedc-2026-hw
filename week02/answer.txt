@@ -1,0 +1,27 @@
+Task 4.2
+Kết quả in:
+BIKE_MODEL (ROM/.rodata):   00007FF70DC24060
+total_odometer (RAM/.bss):  00007FF70DC27030
+current_speed (RAM/Stack):  000000FF581FFE08
+
+Sắp xếp các biến vào phân vùng bộ nhớ tương ứng
+BIKE_MODEL: Nằm ở phân vùng .rodata 
+total_odometer: Nằm ở phân vùng .bss
+current_speed: Nằm ở phân vùng Stack 
+
+Task 4.3
+Hiện tượng xảy ra khi chạy crash_simulation
++Trên máy tính: Trên máy tính của em thì nó dừng khá lâu sau khi thực hiện các lệnh phía trên, 
+                sau đó thì tự tắt chương trình mà không báo lỗi(em nghĩ là sẽ phải báo lỗi nhưng
+                em không giải thích được tại sao nó không báo lỗi)
++Trên vi điều khiển thực tế (ví dụ: ARM Cortex-M): Khi vùng Stack bị tràn đè lên các vùng nhớ khác, CPU sẽ 
+nhảy vào hàm ngắt ngoại lệ (Handler) ISR(Interrupt Service Routine) để xử lý sự cố.
+
+Task 5: 
+Cách 1 là lựa chọn đúng. 
+Nếu dùng cách 1, khi này giá trị khai báo bằng 0 nên sẽ được lưu vào vùng .bss. Mà .bss thuộc RAM nên 
+chương trình sẽ biên dịch thành công(do 40<128).
+
+Còn nếu lưu bằng cách 2, khi này giá trị khai báo khác 0 nên sẽ được lưu vào .data. Tuy nhiên vì là giá trị
+khác 0 nên nó cần được lưu lại. Mà vùng RAM sẽ mất dữ liệu khi tắt điện nên dữ liệu được lưu vào Flash, 
+tuy nhiên do 20<40 nên sẽ bị lỗi.
