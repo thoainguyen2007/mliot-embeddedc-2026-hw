@@ -1,0 +1,53 @@
+TASK 1
+1.1: 
+- CMake: Dùng để mô tả dự án một lần, độc lập với IDE. Nó đọc file CMakeLists.txt rồi sinh ra file cấu hình build.ninja cho thằng Ninja chạy.
+- Ninja: Là trình build tập trung vào tốc độ. Nó đọc file build.ninja từ CMake tạo ra rồi điều phối, gọi compiler dịch code song song cực nhanh.
+- arm-none-eabi-gcc: Là bộ dịch chéo (cross-compiler) cho chip ARM. Nó chịu trách nhiệm dịch code C/Assembly thành mã máy cho nhân Cortex-M3.
+- STM32_Programmer_CLI: Là công cụ nạp code bằng dòng lệnh. Nó lấy file .bin sau khi build xong rồi đổ thẳng vào bộ nhớ flash của chip qua mạch nạp ST-Link.
+
+1.2: 
+- Đầu tiên, CMake sẽ chạy để quét hệ thống rồi tạo ra thư mục build chứa file build.ninja.
+- Tiếp theo, Ninja sẽ đọc file build.ninja đó để lên sơ đồ các file cần dịch.
+- Sau đó, arm-none-eabi-gcc sẽ chạy dưới sự điều phối của Ninja để dịch các file .c, .s thành các file .o rồi link lại thành file .bin cuối cùng.
+- Cuối cùng, STM32_Programmer_CLI lấy file .bin này truyền qua ST-Link nạp thẳng vô địa chỉ 0x08000000 trên chip bằng cổng SWD.
+
+
+--------------------------------------------------------------------------------
+TASK 2: BẢN CHẤT LUỒNG BIÊN DỊCH & TỐI ƯU HÓA
+--------------------------------------------------------------------------------
+
+2.1: Vai trò của Linker và sự khác biệt của file .bin:
+- Tại sao cần Linker: Trình biên dịch chỉ dịch từng file .c độc lập thành từng file .o riêng lẻ. Lúc này, các file .o chỉ chứa mã máy sơ khai, địa chỉ gọi hàm giữa các file vẫn bị bỏ trống (vì file này chưa biết file kia nằm đâu) nên chip chưa chạy được. Phải cần đến Linker để gom các file .o lại, khớp nối các hàm với nhau và gán địa chỉ vật lý chính xác cho phần cứng dựa vào file Linker Script (.ld).
+- Điểm khác biệt cốt lõi: 
+  + File .o là mã máy phân rã mang tính cục bộ của từng file nguồn, chứa địa chỉ tương đối và chưa được kết nối với nhau.
+  + File .bin là file nhị phân thuần túy, đã lột sạch thông tin thừa (như debug, tên section). Nó là một chuỗi byte liên tục mang địa chỉ vật lý tuyệt đối, sẵn sàng nạp vào flash để chip chạy luôn.
+
+2.2: Tính năng "Build tăng dần" (Incremental Build) của Ninja:
+- Vai trò: Trong dự án lớn có cả trăm file, nếu sửa một dòng mà phải build lại từ đầu thì rất mất thời gian. Build tăng dần giúp Ninja chỉ dịch lại những gì vừa sửa, tiết kiệm thời gian chờ đợi.
+- Cơ chế: Ninja quản lý một đồ thị phụ thuộc giữa các file kèm theo nhãn thời gian (Timestamp). Khi cậu sửa file main.c, Timestamp của nó sẽ mới hơn file main.o cũ. Ninja phát hiện ra điều này và chỉ gọi duy nhất lệnh dịch lại file main.c đó thành main.o mới, rồi đem đi link luôn với các file .o cũ khác mà không cần dịch lại cả dự án.
+
+
+--------------------------------------------------------------------------------
+TASK 3: BẢN ĐỒ BỘ NHỚ & LINKER SCRIPT
+--------------------------------------------------------------------------------
+
+3.1: Giải thích LMA và VMA của vùng .data qua đoạn script:
+- LMA (Địa chỉ nạp): Là địa chỉ lưu trữ gốc của dữ liệu nằm ở FLASH (trong đoạn mã là AT> FLASH). Vì RAM sẽ mất hết dữ liệu khi mất điện, nên các giá trị khởi tạo gốc của biến toàn cục bắt buộc phải cất ở FLASH để không bị mất đi.
+- VMA (Địa chỉ chạy): Là địa chỉ hoạt động thực tế khi chương trình chạy nằm ở RAM (trong đoạn mã là >RAM). Vì trong lúc chạy, CPU cần đọc/ghi (thay đổi giá trị) của biến liên tục, mà bộ nhớ FLASH thì không cho phép ghi ngẫu nhiên tốc độ cao như RAM được.
+- Tại sao cần cả hai: Vì đặc thù phần cứng nhúng yêu cầu dữ liệu của biến phải sống sót khi mất điện (cần LMA ở FLASH) nhưng phải thay đổi được khi đang chạy (cần VMA ở RAM).
+
+3.2: Hệ quả nếu Startup Code quên sao chép dữ liệu:
+- Khi vừa bấm Reset, CPU sẽ nhảy vào Reset_Handler (Startup code) đầu tiên để chạy vòng lặp copy dữ liệu .data từ _sidata (FLASH) sang _sdata (RAM).
+- Nếu bỏ qua bước này, phân vùng RAM chứa các biến toàn cục sẽ chỉ toàn giá trị rác hoặc giá trị 0 mặc định của phần cứng lúc mới cấp điện. Khi vào hàm main(), CPU đọc biến lên sẽ bị sai lệch hoàn toàn so với lúc khai báo, khiến các logic kiểm tra điều kiện chạy loạn và treo mạch ngay lập tức.
+
+
+--------------------------------------------------------------------------------
+TASK 4: CÁC CÂU LỆNH ĐƠN TRÊN TERMINAL
+--------------------------------------------------------------------------------
+
+4.1: Câu lệnh CMake cấu hình dự án, dùng Generator Ninja, xuất ra mục 'build':
+cmake -B build -G Ninja
+
+4.2: Câu lệnh gọi Ninja tiến hành biên dịch:
+cmake --build build
+
