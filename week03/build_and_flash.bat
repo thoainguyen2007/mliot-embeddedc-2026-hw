@@ -57,7 +57,7 @@ echo ===============================================
 echo Build completed successfully!
 echo.
 
-STM32_Programmer_CLI -c port=SWD sn=B55B5A1A000000005C83F501 -w build/hw3.bin 0x08000000 -v -rst
+STM32_Programmer_CLI -c port=SWD sn=B55B5A1A000000005C83F501 -w build/app_firmware.bin 0x08000000 -v -rst
 
 pause
 endlocal
