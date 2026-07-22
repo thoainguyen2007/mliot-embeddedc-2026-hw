@@ -1,0 +1,3 @@
+D:/mliot-embeddedc-2026-hw/week04/projectw4/build/CMakeFiles/projectw4.dir
+D:/mliot-embeddedc-2026-hw/week04/projectw4/build/CMakeFiles/edit_cache.dir
+D:/mliot-embeddedc-2026-hw/week04/projectw4/build/CMakeFiles/rebuild_cache.dir

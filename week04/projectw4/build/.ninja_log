@@ -1,0 +1,9 @@
+# ninja log v7
+72	661	8064351196497245	CMakeFiles/projectw4.dir/startup_stm32f103xb.s.obj	cb88080d6de645c2
+29	738	8064351196065887	CMakeFiles/projectw4.dir/main.c.obj	b0e843a32a2781b7
+94	784	8064351196768164	CMakeFiles/projectw4.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c.obj	8cb127818a8d08a7
+47	816	8064351196235522	CMakeFiles/projectw4.dir/system_stm32f1xx.c.obj	7159fdd9396f1bd8
+150	1078	8064351197465044	CMakeFiles/projectw4.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c.obj	fb1668139e1bbd04
+213	1111	8064351197896968	CMakeFiles/projectw4.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c.obj	f7a55877a53017c8
+677	1619	8064351202563098	CMakeFiles/projectw4.dir/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_cortex.c.obj	1440f6944b6a2799
+1621	2245	8064351211988061	projectw4.elf	6df7f504dd8dafd2
